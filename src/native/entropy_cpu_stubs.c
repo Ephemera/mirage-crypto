@@ -32,14 +32,15 @@
    implementations on different platforms. Its lower 32 bits are used for
    entropy collection on every entry to the main event loop.
 
-   The requirement for this function is that every call to it (from OCaml)
-   should lead to a different output (in the lower 32 bits), and it should be
-   unpredictable (since the timestamp / cpu cycle counter is fine-grained
-   enough).
+   The requirement for this function is that its output (in the lower 32 bits)
+   should be unpredictable and advance over time, so that consecutive entries
+   to the event loop (microseconds apart) observe different values. It need
+   not differ between two back-to-back calls: some counters tick at a fixed,
+   low frequency (e.g. cntvct_el0 at 24 MHz on Apple Silicon).
 
-   The executable test/test_entropy.ml tests parts of the requirements by
-   calling mc_cycle_counter 10 times and comparing the output to the previous
-   output.
+   Mirage_crypto_rng.entropy_test (rng/entropy_test.ml) tests parts of the
+   requirements by calling mc_cycle_counter repeatedly and failing if the
+   output does not change within a bounded number of calls.
 */
 
 #if defined (_MSC_VER)

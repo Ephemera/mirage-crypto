@@ -26,12 +26,16 @@ let whirlwind_bootstrap_check () =
   done
 
 let timer_check () =
-  for i = 0 to 10 do
-    let data' = Entropy.interrupt_hook () in
-    if String.equal !data data' then
-      failwith ("same data from timer at " ^ string_of_int i ^ " with: " ^ String.escaped data');
-    data := data'
-  done
+  (* The counter may tick slower than back-to-back calls (e.g. cntvct_el0 at
+     24 MHz on Apple Silicon), so only require that it is not stuck. *)
+  let max_calls = 1 lsl 16 in
+  let first = Entropy.interrupt_hook () in
+  let n = ref 0 in
+  while !n < max_calls && String.equal first (Entropy.interrupt_hook ()) do
+    incr n
+  done;
+  if !n >= max_calls then
+    failwith ("timer entropy source looks constant: " ^ String.escaped first)
 
 let test () =
   timer_check ();

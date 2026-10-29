@@ -48,12 +48,7 @@
  (modules test_entropy_collection)
  (package mirage-crypto-rng-mirage)
  (libraries mirage-crypto-rng-mirage mirage-unix duration ohex)
- (enabled_if
-  (and
-   (<> %{architecture} "arm64")
-   (and
-    (<> %{architecture} "riscv")
-    (or (<> %{system} "macosx") (<> %{architecture} "amd64"))))))
+ (enabled_if (<> %{architecture} "riscv")))
  ; see https://github.com/mirage/mirage-crypto/issues/216
 
 (test
